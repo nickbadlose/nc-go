@@ -32,7 +32,7 @@ func main() {
 			panic(fmt.Sprintf("db error, %v", err))
 		}
 
-		sql, _, err := squirrel.Select("*").From("articles").Limit(1).ToSql()
+		sql, _, err := squirrel.Select("*").From("articles").ToSql()
 		if err != nil {
 			panic(fmt.Sprintf("sql building error, %v", err))
 		}
@@ -42,24 +42,20 @@ func main() {
 			panic(fmt.Sprintf("db reading error, %v", err))
 		}
 
-		rows.Scan()
-
 		articles := make([]article, 0)
 
-		rs, err := rows.Values()
-		if err != nil {
-			panic(fmt.Sprintf("db reading row values, %v", err))
-		}
-
-		for _, row := range rs {
-			err = row.Scan(&a.Id, &a.Title, &a.Body, &a.Votes, &a.CreatedAt)
+		for rows.Next() {
+			var a article
+			err = rows.Scan(&a.Id, &a.Title, &a.Body, &a.Votes, &a.CreatedAt)
 			if err != nil {
 				panic(fmt.Sprintf("scan error, %v", err))
 			}
-			ma, err := json.Marshal(a)
-			if err != nil {
-				panic(fmt.Sprintf("marshaling error, %v", err))
-			}
+			articles = append(articles, a)
+		}
+
+		ma, err := json.Marshal(articles)
+		if err != nil {
+			panic(fmt.Sprintf("marshaling error, %v", err))
 		}
 		w.WriteHeader(200)
 		w.Write(ma)
