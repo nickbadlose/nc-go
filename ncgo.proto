@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package ncgo;
+
+option go_package = ".;ncgo";
+
+message QueryRequest {
+  string Query = 1;
+};
+
+message article {
+  int64 id = 1;
+  string title = 2;
+  string body = 3;
+  int64 votes = 4;
+  string created_at = 5;
+}
+
+message articleSet {
+  repeated article articles = 1;
+}
+
+service ncGoService {
+  rpc findAll (QueryRequest) returns (articleSet);
+}
